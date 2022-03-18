@@ -8,10 +8,6 @@ import (
 	"github.com/jctaveras/split-us/pkg/http/rest"
 )
 
-type SuccessfullResponse struct {
-	Data any `json:"data"`
-}
-
 func main() {
 	server := rest.NewServer()
 
