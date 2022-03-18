@@ -12,7 +12,7 @@ type router struct {
 	mux *http.ServeMux
 }
 
-func NewRouter() Router {
+func newRouter() Router {
 	mux := http.NewServeMux()
 	return &router{mux}
 }
@@ -35,3 +35,5 @@ func (r *router) POST(pattern string, fn http.HandlerFunc) {
 		fn(w, r)
 	})
 }
+
+var Routes = newRouter()

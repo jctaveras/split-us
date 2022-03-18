@@ -5,10 +5,13 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/jctaveras/split-us/pkg/http/rest/routes/auth"
+	"github.com/jctaveras/split-us/pkg/http/router"
 )
 
 type Server interface {
-	Start() error
+	Start(context.Context) error
 }
 
 type server struct {
@@ -16,10 +19,11 @@ type server struct {
 }
 
 func NewServer() Server {
-	return &server{handlers: Handlers()}
+	return &server{handlers: router.Routes.Handlers()}
 }
 
-func (s *server) Start() error {
+func (s *server) Start(ctx context.Context) error {
+	auth.InitAuthHandlers(ctx)
 	rest := &http.Server{
 		Addr: ":8080",
 		Handler: s.handlers,

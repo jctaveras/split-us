@@ -1,24 +1,24 @@
-package rest
+package auth
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 
-
 	"github.com/go-playground/validator/v10"
-	"github.com/jctaveras/split-us/pkg/database/user"
+	"github.com/jctaveras/split-us/pkg/database/signup"
+	"github.com/jctaveras/split-us/pkg/database/storage"
 	"github.com/jctaveras/split-us/pkg/http/router"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Handlers() *http.ServeMux {
-	router := router.NewRouter()
-
-	router.POST("/api/user/sign-up", func(w http.ResponseWriter, r *http.Request) {
-		userModel := user.NewModel()
+func InitAuthHandlers(ctx context.Context) {
+	router.Routes.POST("/api/user/sign-up", func(w http.ResponseWriter, r *http.Request) {
+		storage := ctx.Value(storage.Storage{}).(signup.Storage)
+		service := signup.NewSignUpService(storage)
 		hashChan := make(chan []byte)
-		var userData user.Schema
+		var userData signup.User
 
 		error := json.NewDecoder(r.Body).Decode(&userData)
 
@@ -43,13 +43,11 @@ func Handlers() *http.ServeMux {
 			return
 		}
 
-		if error := userModel.NewUser(userData); error != nil {
+		if error := service.SignUp(userData); error != nil {
 			http.Error(w, error.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
 	})
-
-	return router.Handlers()
 }

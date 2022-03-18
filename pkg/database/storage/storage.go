@@ -2,26 +2,37 @@ package storage
 
 import (
 	"context"
-	"log"
 	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/jctaveras/split-us/pkg/database/signup"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func newStorage() *mongo.Database {
-	if error := godotenv.Load(); error != nil {
-		log.Fatal(error)
-	}
+type Storage struct {
+	Database *mongo.Database
+}
 
+const (
+	UserCollection = "Users"
+)
+
+func NewStorage() *Storage {
 	mongoURI := os.Getenv("MONGO_URI")
 
 	if client, error := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI)); error != nil {
 		panic(error)
 	} else {
-		return client.Database("split-us")
+		return &Storage{Database: client.Database("split-us")}
 	}
 }
 
-var DataBase = newStorage()
+func (s *Storage) SignUp(user signup.User) error {
+	collection := s.Database.Collection(UserCollection)
+
+	if _, error := collection.InsertOne(context.TODO(), user); error != nil {
+		return error
+	}
+
+	return nil
+}
