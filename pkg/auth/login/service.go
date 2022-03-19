@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Storage interface {
-	FindUser(User) (User, error)
+	FindUser(interface{}) *mongo.SingleResult
 }
 
 type service struct {
@@ -22,7 +24,10 @@ func NewLoginService(s Storage) *service {
 }
 
 func (service *service) Login(credentials User) (string, error) {
-	if user, error := service.s.FindUser(credentials); error != nil {
+	result := service.s.FindUser(bson.D{{Key: "email", Value: credentials.Email}})
+	var user User
+
+	if error := result.Decode(&user); error != nil {
 		return "", error
 	} else {
 		if didPasswordMatch([]byte(user.Password), []byte(credentials.Password)) {

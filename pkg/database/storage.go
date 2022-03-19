@@ -4,9 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/jctaveras/split-us/pkg/auth/login"
 	"github.com/jctaveras/split-us/pkg/auth/signup"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -39,13 +37,8 @@ func (s *Storage) SignUp(user signup.User) error {
 	return nil
 }
 
-func (s *Storage) FindUser(user login.User) (login.User, error) {
-	var data login.User
+func (s *Storage) FindUser(filter interface{}) *mongo.SingleResult {
 	collection := s.Database.Collection(UserCollection)
-	
-	if error := collection.FindOne(context.TODO(), bson.D{{Key: "email", Value: user.Email}}).Decode(&data); error != nil {
-		return data, error
-	}
 
-	return data, nil
+	return collection.FindOne(context.TODO(), filter)
 }
