@@ -2,17 +2,11 @@ package router
 
 import "net/http"
 
-type Router interface {
-	Handlers() *http.ServeMux
-	GET(string, http.HandlerFunc)
-	POST(string, http.HandlerFunc)
-}
-
 type router struct {
 	mux *http.ServeMux
 }
 
-func newRouter() Router {
+func newRouter() *router {
 	mux := http.NewServeMux()
 	return &router{mux}
 }
