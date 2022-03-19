@@ -1,11 +1,11 @@
-package storage
+package database 
 
 import (
 	"context"
 	"os"
 
-	"github.com/jctaveras/split-us/pkg/database/login"
-	"github.com/jctaveras/split-us/pkg/database/signup"
+	"github.com/jctaveras/split-us/pkg/auth/login"
+	"github.com/jctaveras/split-us/pkg/auth/signup"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

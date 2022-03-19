@@ -7,16 +7,16 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/jctaveras/split-us/pkg/database/login"
-	"github.com/jctaveras/split-us/pkg/database/signup"
-	"github.com/jctaveras/split-us/pkg/database/storage"
+	"github.com/jctaveras/split-us/pkg/auth/login"
+	"github.com/jctaveras/split-us/pkg/auth/signup"
+	"github.com/jctaveras/split-us/pkg/database"
 	"github.com/jctaveras/split-us/pkg/http/router"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func InitAuthHandlers(ctx context.Context) {
 	router.Routes.POST("/api/user/sign-up", func(w http.ResponseWriter, r *http.Request) {
-		storage := ctx.Value(storage.Storage{}).(signup.Storage)
+		storage := ctx.Value(database.Storage{}).(signup.Storage)
 		service := signup.NewSignUpService(storage)
 		hashChan := make(chan []byte)
 		var userData signup.User
@@ -53,7 +53,7 @@ func InitAuthHandlers(ctx context.Context) {
 	})
 
 	router.Routes.POST("/api/user/login", func(w http.ResponseWriter, r *http.Request) {
-		storage := ctx.Value(storage.Storage{}).(login.Storage)
+		storage := ctx.Value(database.Storage{}).(login.Storage)
 		service := login.NewLoginService(storage)
 		var credentials login.User
 
