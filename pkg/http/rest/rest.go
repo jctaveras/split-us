@@ -10,15 +10,11 @@ import (
 	"github.com/jctaveras/split-us/pkg/http/router"
 )
 
-type Server interface {
-	Start(context.Context) error
-}
-
 type server struct {
 	handlers *http.ServeMux
 }
 
-func NewServer() Server {
+func NewServer() *server {
 	return &server{handlers: router.Routes.Handlers()}
 }
 

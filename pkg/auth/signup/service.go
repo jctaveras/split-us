@@ -1,9 +1,5 @@
 package signup
 
-type Service interface {
-	SignUp(User) error
-}
-
 type Storage interface {
 	SignUp(User) error
 }
@@ -12,7 +8,7 @@ type service struct {
 	s Storage
 }
 
-func NewSignUpService(s Storage) Service {
+func NewSignUpService(s Storage) *service {
 	return &service{s}
 }
 

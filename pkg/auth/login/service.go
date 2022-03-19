@@ -9,10 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Service interface {
-	Login(User) (string, error)
-}
-
 type Storage interface {
 	FindUser(User) (User, error)
 }
@@ -21,7 +17,7 @@ type service struct {
 	s Storage
 }
 
-func NewLoginService(s Storage) Service {
+func NewLoginService(s Storage) *service {
 	return &service{s}
 }
 
