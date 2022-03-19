@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jctaveras/split-us/pkg/database/storage"
+	"github.com/jctaveras/split-us/pkg/database"
 	"github.com/jctaveras/split-us/pkg/http/rest"
 	"github.com/joho/godotenv"
 )
@@ -14,8 +14,8 @@ func main() {
 		panic(error)
 	}
 
-	s := storage.NewStorage()
-	ctx := context.WithValue(context.Background(), storage.Storage{}, s)
+	s := database.NewStorage()
+	ctx := context.WithValue(context.Background(), database.Storage{}, s)
 	server := rest.NewServer()
 
 	fmt.Println("Server is running on: http://localhost:8080")
