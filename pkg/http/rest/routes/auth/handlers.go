@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/jctaveras/split-us/pkg/database/login"
 	"github.com/jctaveras/split-us/pkg/database/signup"
 	"github.com/jctaveras/split-us/pkg/database/storage"
 	"github.com/jctaveras/split-us/pkg/http/router"
@@ -49,5 +50,30 @@ func InitAuthHandlers(ctx context.Context) {
 		}
 
 		w.WriteHeader(http.StatusCreated)
+	})
+
+	router.Routes.POST("/api/user/login", func(w http.ResponseWriter, r *http.Request) {
+		storage := ctx.Value(storage.Storage{}).(login.Storage)
+		service := login.NewLoginService(storage)
+		var credentials login.User
+
+		if error := json.NewDecoder(r.Body).Decode(&credentials); error != nil {
+			http.Error(w, error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if error := validator.New().Struct(credentials); error != nil {
+			http.Error(w, error.Error(), http.StatusBadRequest)
+			return
+		}
+
+		token, error := service.Login(credentials)
+
+		if error != nil {
+			http.Error(w, error.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.Write([]byte(token))
 	})
 }
