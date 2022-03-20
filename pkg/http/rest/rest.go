@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jctaveras/split-us/pkg/http/rest/routes/auth"
+	"github.com/jctaveras/split-us/pkg/http/rest/routes/user"
 	"github.com/jctaveras/split-us/pkg/http/router"
 )
 
@@ -20,6 +21,7 @@ func NewServer() *server {
 
 func (s *server) Start(ctx context.Context) error {
 	auth.InitAuthHandlers(ctx)
+	user.InitUserHandlers(ctx)
 	rest := &http.Server{
 		Addr: ":8080",
 		Handler: s.handlers,
