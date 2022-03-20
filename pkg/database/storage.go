@@ -27,7 +27,7 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) SignUp(user signup.User) error {
+func (s *Storage) NewUser(user signup.User) error {
 	collection := s.Database.Collection(UserCollection)
 
 	if _, error := collection.InsertOne(context.TODO(), user); error != nil {

@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"io"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -11,33 +11,18 @@ import (
 	"github.com/jctaveras/split-us/pkg/auth/signup"
 	"github.com/jctaveras/split-us/pkg/database"
 	"github.com/jctaveras/split-us/pkg/http/router"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func InitAuthHandlers(ctx context.Context) {
 	router.Routes.POST("/api/user/sign-up", func(w http.ResponseWriter, r *http.Request) {
 		storage := ctx.Value(database.Storage{}).(signup.Storage)
 		service := signup.NewSignUpService(storage)
-		hashChan := make(chan []byte)
 		var userData signup.User
 
-		error := json.NewDecoder(r.Body).Decode(&userData)
-
-		if error != nil {
+		if error := json.NewDecoder(r.Body).Decode(&userData); error != nil && error != io.EOF {
 			http.Error(w, error.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		// This is just to understand Channels 
-		go func (password string, ch chan []byte)  {
-			if hash, error := bcrypt.GenerateFromPassword([]byte(password), 10); error != nil {
-				log.Fatalf("Error while hashing the password: %v", error)
-			} else {
-				ch <- hash
-			}
-		}(userData.Password, hashChan)
-			
-		userData.Password = string(<-hashChan)
 
 		if error := validator.New().Struct(userData); error != nil {
 			http.Error(w, error.Error(), http.StatusBadRequest)

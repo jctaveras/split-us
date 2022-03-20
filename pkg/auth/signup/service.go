@@ -1,7 +1,9 @@
 package signup
 
+import "golang.org/x/crypto/bcrypt"
+
 type Storage interface {
-	SignUp(User) error
+	NewUser(User) error
 }
 
 type service struct {
@@ -13,7 +15,15 @@ func NewSignUpService(s Storage) *service {
 }
 
 func (service *service) SignUp(user User) error {
-	if error := service.s.SignUp(user); error != nil {
+	hashed, error := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+
+	if error != nil {
+		return error
+	}
+
+	user.Password = string(hashed)
+
+	if error := service.s.NewUser(user); error != nil {
 		return error
 	}
 
