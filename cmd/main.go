@@ -3,9 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 
+	"github.com/jctaveras/split-us/pkg/app"
+	authhandler "github.com/jctaveras/split-us/pkg/auth-handler"
 	"github.com/jctaveras/split-us/pkg/database"
-	"github.com/jctaveras/split-us/pkg/http/rest"
+	friendhandler "github.com/jctaveras/split-us/pkg/friend-handler"
+	userhandler "github.com/jctaveras/split-us/pkg/user-handler"
+
 	"github.com/joho/godotenv"
 )
 
@@ -15,18 +20,26 @@ func main() {
 	}
 
 	s := database.NewStorage()
-	ctx := context.WithValue(context.Background(), database.Storage{}, s)
-	server := rest.NewServer()
+	app := &app.App{
+		AuthHandler: &authhandler.AuthHandler{
+			LoginHandler: authhandler.NewLoginHandler(),
+			SignUpHandler: authhandler.NewSignUpHandler(),
+		},
+		FriendHandler: &friendhandler.FriendHandler{
+			AddFriendHandler: friendhandler.NewAddFriendHandler(),
+		},
+		UserHandler: &userhandler.UserHandler{
+			ProfileHandler: userhandler.NewProfileHandler(),
+		},
+		Repository: s,
+	}
 
-	fmt.Println("Server is running on: http://localhost:8080")
-
-	defer func () {
+	defer func() {
 		if error := s.Database.Client().Disconnect(context.TODO()); error != nil {
 			panic(error)
 		}
 	}()
 
-	if error := server.Start(ctx); error != nil {
-		panic(error)
-	}
+	fmt.Println("Server is running on: http://localhost:8080")
+	http.ListenAndServe(":8080", app)
 }

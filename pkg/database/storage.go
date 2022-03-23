@@ -1,10 +1,11 @@
-package database 
+package database
 
 import (
 	"context"
 	"os"
 
-	"github.com/jctaveras/split-us/pkg/auth/signup"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -27,7 +28,7 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) NewUser(user signup.User) error {
+func (s *Storage) NewUser(user interface{}) error {
 	collection := s.Database.Collection(UserCollection)
 
 	if _, error := collection.InsertOne(context.TODO(), user); error != nil {
@@ -41,4 +42,21 @@ func (s *Storage) FindUser(filter interface{}) *mongo.SingleResult {
 	collection := s.Database.Collection(UserCollection)
 
 	return collection.FindOne(context.TODO(), filter)
+}
+
+func (s *Storage) AddFriend(id primitive.ObjectID, user interface{}) error {
+	collection := s.Database.Collection(UserCollection)
+	update := bson.D{{
+		Key: "$push", 
+		Value: bson.D{{
+			Key: "friends", 
+			Value: user,
+		}},
+	}}
+
+	if _, error := collection.UpdateByID(context.TODO(), id, update); error != nil {
+		return error
+	}
+
+	return nil
 }
