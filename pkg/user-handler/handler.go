@@ -9,7 +9,6 @@ import (
 
 const (
 	UserProfile = "profile"
-	AddFriends  = "add-friends"
 )
 
 type UserHandler struct {
