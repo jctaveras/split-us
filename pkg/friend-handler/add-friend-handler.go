@@ -2,6 +2,7 @@ package friendhandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/jctaveras/split-us/pkg/database"
@@ -29,19 +30,28 @@ func (handler *addFriendHandler) Handler(id primitive.ObjectID) http.HandlerFunc
 			return
 		}
 
+		var user User
 		storage := req.Context().Value(database.Storage{}).(*database.Storage)
+
+		if error := storage.FindUser(bson.D{{Key: "_id", Value: id}}).Decode(&user); error == mongo.ErrNoDocuments {
+			http.Error(res, fmt.Sprintf("No user Found with ID: %v", id), http.StatusNotFound)
+			return
+		} else if error != nil {
+			http.Error(res, error.Error(), http.StatusInternalServerError)
+			return
+		}
 		
 		for _, friendId := range data.Friends {
 			var friend User
 			friendObjectId, error := primitive.ObjectIDFromHex(friendId)
 
 			if error != nil {
-				http.Error(res, error.Error(), http.StatusInternalServerError)
+				http.Error(res, "Invalida Friend ID", http.StatusBadRequest)
 				return
 			}
 
 			if error := storage.FindUser(bson.D{{Key: "_id", Value: friendObjectId}}).Decode(&friend); error == mongo.ErrNoDocuments {
-				http.Error(res, error.Error(), http.StatusNotFound)
+				http.Error(res, fmt.Sprintf("No User Found with ID: %v", friendObjectId), http.StatusNotFound)
 				return
 			} else if error != nil {
 				http.Error(res, error.Error(), http.StatusInternalServerError)
@@ -49,6 +59,11 @@ func (handler *addFriendHandler) Handler(id primitive.ObjectID) http.HandlerFunc
 			}
 
 			if error := storage.AddFriend(id, friend); error != nil {
+				http.Error(res, error.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if error := storage.AddFriend(friend.ID, user); error != nil {
 				http.Error(res, error.Error(), http.StatusInternalServerError)
 				return
 			}
