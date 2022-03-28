@@ -46,7 +46,7 @@ func (handler *loginHandler) Handler() http.HandlerFunc {
 		if didPasswordMatch([]byte(user.Password), []byte(credentials.Password)) {
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 				"userID": user.ID.Hex(),
-				"exp": time.Now().Add(5 * time.Minute),
+				"exp": time.Now().Add(15 * time.Minute),
 			})
 			tokenString, signedError := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
