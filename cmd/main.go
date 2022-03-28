@@ -9,6 +9,7 @@ import (
 	authhandler "github.com/jctaveras/split-us/pkg/auth-handler"
 	"github.com/jctaveras/split-us/pkg/database"
 	friendhandler "github.com/jctaveras/split-us/pkg/friend-handler"
+	servicehandler "github.com/jctaveras/split-us/pkg/service-handler"
 	userhandler "github.com/jctaveras/split-us/pkg/user-handler"
 
 	"github.com/joho/godotenv"
@@ -32,6 +33,10 @@ func main() {
 			ProfileHandler: userhandler.NewProfileHandler(),
 		},
 		Repository: s,
+		ServiceHandler: &servicehandler.ServiceHandler{
+			AddServiceHandler: servicehandler.NewAddServiceHandler(),
+			AddUserHandler: servicehandler.NewAddUserHandler(),
+		},
 	}
 
 	defer func() {

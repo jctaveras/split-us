@@ -16,6 +16,7 @@ type Storage struct {
 
 const (
 	UserCollection = "Users"
+	ServiceCollection = "Services"
 )
 
 func NewStorage() *Storage {
@@ -50,6 +51,39 @@ func (s *Storage) AddFriend(id primitive.ObjectID, user interface{}) error {
 		Key: "$push", 
 		Value: bson.D{{
 			Key: "friends", 
+			Value: user,
+		}},
+	}}
+
+	if _, error := collection.UpdateByID(context.TODO(), id, update); error != nil {
+		return error
+	}
+
+	return nil
+}
+
+func (s *Storage) NewService(service interface{}) error {
+	collection := s.Database.Collection(ServiceCollection)
+
+	if _, error := collection.InsertOne(context.TODO(), service); error != nil {
+		return error
+	}
+
+	return nil
+}
+
+func (s *Storage) FindService(filter interface{}) *mongo.SingleResult {
+	collection := s.Database.Collection(ServiceCollection)
+
+	return collection.FindOne(context.TODO(), filter)
+}
+
+func (s *Storage) AddUserToService(id primitive.ObjectID, user interface{}) error {
+	collection := s.Database.Collection(ServiceCollection)
+	update := bson.D{{
+		Key: "$push",
+		Value: bson.D{{
+			Key: "users",
 			Value: user,
 		}},
 	}}
